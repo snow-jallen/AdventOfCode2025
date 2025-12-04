@@ -1,3 +1,4 @@
+#:property PublishAot=false
 string path = args.FirstOrDefault() == "real" ? "real.txt" : "sample.txt";
 var lines = File.ReadAllLines(path);
 long movableRolls = 0;
@@ -29,7 +30,8 @@ int moveRolls(ref int generation)
             if(neighbors < 4)
             {
                 movableRolls++;
-                lines[row] = lines[row].Remove(col, 1).Insert(col, "@");
+                var newLine = lines[row].Remove(col, 1).Insert(col, ".");
+                lines[row] = newLine;
             }
         }
     }
