@@ -14,3 +14,13 @@ var spoiled = from line in lines
         select ingredientId;
 
 Console.WriteLine($"Total Spoiled Ingredients: {spoiled.Count()}");
+
+long freshIngredientCount = 0;
+long lastStart = -1;
+List<(long Start, long End)> processedRanges = new ();
+foreach(var range in ranges)
+{
+    if(processedRanges.an)
+}
+
+Console.WriteLine($"Total Fresh Ingredients: {freshIngredients.Count}");
