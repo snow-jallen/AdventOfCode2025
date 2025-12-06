@@ -16,7 +16,7 @@ var spoiled = from line in lines
 Console.WriteLine($"Total Spoiled Ingredients: {spoiled.Count()}");
 
 List<(long Start, long End)> processedRanges = new();
-foreach (var range in ranges)
+foreach (var range in ranges.OrderBy(r => r.Start))
 {
     //early range
     var firstProcessedRange = processedRanges.OrderBy(p => p.Start).FirstOrDefault();
@@ -59,4 +59,5 @@ foreach (var range in ranges)
 }
 
 var sum = processedRanges.Sum(r => r.End - r.Start + 1);
+processedRanges.ForEach(r => Console.WriteLine($"Fresh Range: {r.Start}-{r.End}"));
 Console.WriteLine($"Total Fresh Ingredients: {sum}");
