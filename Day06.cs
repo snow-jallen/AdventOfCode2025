@@ -1,28 +1,29 @@
 #:property PublishAot=false
 string path = args.FirstOrDefault() == "real" ? "real.txt" : "sample.txt";
 var lines = File.ReadAllLines(path);
-
+var lineLen = lines[0].Length;
 var columns = new List<Column>();
-foreach (var line in lines)
+foreach (var line in lines.Take(lines.Length - 1))
 {
-    var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-    for (int i = 0; i < parts.Length; i++)
+    var columnIndex = 0;
+    var newValue = 0L;
+    for (int i = 0; i < lineLen; i++)
     {
-        if (parts[i] is "*" or "+")
-        {
-            string operation = parts[i];
-            columns[i].Calculate(operation);
-            continue;
-        }
-
         if (columns.Count <= i)
             columns.Add(new Column());
-        columns[i].Values.Add(long.Parse(parts[i]));
+
+        if (lines[i] == ' ')
+            columnIndex++;
+
+        int digit = line[i] - '0';
+        newValue *= 10;
+        newValue += digit;
     }
+    columns[columnIndex].Values.Add(newValue);
+    newValue = 0;
 }
 
-Console.WriteLine($"Result: {columns.Sum(c => c.Result)}");
+Console.WriteLine($"Result: {columns.Sum(c => c.Calculate(c.Operation))}");
 
 public class Column
 {
