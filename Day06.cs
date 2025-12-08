@@ -2,42 +2,43 @@
 string path = args.FirstOrDefault() == "real" ? "real.txt" : "sample.txt";
 var lines = File.ReadAllLines(path);
 var lineLen = lines[0].Length;
-var columns = new List<Column>();
-var operations = lines.Last().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-foreach(var op in operations)
-{
-    columns.Add(new Column());
-}
 
-foreach (var line in lines.Take(lines.Length - 1))
-{
-    var columnIndex = 0;
-    var newValue = 0L;
-    for (int i = 0; i < lineLen; i++)
-    {
-        if (line[i] == ' ')
-        {
-            columns[columnIndex].Values.Add(newValue);
-            newValue = 0;
-            columnIndex++;
-        }
+var columnBreaks = Enumerable.Range(0, lineLen)
+    .Where(i => isEntireColumnSpaces(i))
+    .ToList();
+columnBreaks.Insert(0, -1);
+columnBreaks.Add(lineLen);
 
-        int digit = line[i] - '0';
-        newValue *= 10;
-        newValue += digit;
-    }
+Console.WriteLine($"Found the following column breaks at indexes: {string.Join(", ", columnBreaks)}");
 
-}
 
-for (int i = 0; i < columns.Count; i++)
-{
-    columns[i].Calculate(operations[i]);
-}
+var columns = columnBreaks.Zip(columnBreaks.Skip(1), (start, end) => 
+    lines.Select(line => line[(start+1)..end]).ToList()
+).Select(chunk => new Column(chunk)).ToList();
 
-Console.WriteLine($"Result: {columns.Sum(c => c.Result)}");
+Console.WriteLine($"Parsed {columns.Sum(c=>c.Result)} columns.");
+
+bool isEntireColumnSpaces(int colIndex) => lines.All(line => line[colIndex] == ' ');
 
 public class Column
 {
+    public Column(List<string> rows)
+    {
+        Operation = rows.Last()[0];
+        Values = Enumerable.Repeat(0L, rows[0].Length).ToList();
+        foreach(var row in rows.SkipLast(1))
+        {
+            foreach(var digit in row.Select((ch, idx) => (ch, idx)))
+            {
+                if(char.IsDigit(digit.ch))
+                {
+                    Values[digit.idx] = Values[digit.idx] * 10 + (digit.ch - '0');
+                }
+            }
+        }
+        Calculate(Operation.ToString());
+    }
+    public char Operation{get; private set;}
     public List<long> Values = new();
     public long Calculate(string operation)
     {
@@ -52,3 +53,4 @@ public class Column
     }
     public long Result { get; set; }
 }
+
