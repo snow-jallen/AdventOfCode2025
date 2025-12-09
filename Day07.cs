@@ -45,6 +45,7 @@ HashSet<int> moveLine(HashSet<int> currentBeams, int row)
             // Splitter found, create two beams
             nextBeams.Add(beamCol - 1); // Left beam
             nextBeams.Add(beamCol + 1); // Right beam
+
             splitHappened++;
         }
         else
@@ -57,3 +58,20 @@ HashSet<int> moveLine(HashSet<int> currentBeams, int row)
 }
 
 record Point(int Row, int Col);
+
+public class Splitter
+{
+    public Splitter(int row, int col)
+    {
+        Row = row;
+        Col = col;
+    }
+
+    public int Row { get; }
+    public int Col { get; }
+    public int PathsForward() => 2 + Children.Sum(c => c.PathsForward());
+    public IEnumerable<Splitter> Children => Enumerable.Empty<Splitter>();
+    public override string ToString() => $"Splitter at ({Row}, {Col})";
+    public override bool Equals(object? obj) => obj is Splitter other && Row == other.Row && Col == other.Col && Children == other.Children;
+    public override int GetHashCode() => HashCode.Combine(Row, Col, Children);
+}
