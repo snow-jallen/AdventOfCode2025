@@ -22,56 +22,49 @@ if(startCol != splitters.First().Col)
     return;
 }
 
-int splitHappened = 0;
-HashSet<int> currentBeams = [startCol];
-for(int row=1; row < lines.Length; row++)
-{
-    Console.WriteLine();
-    var nextBeams = moveLine(currentBeams, row);
-    Console.WriteLine($"Line {row}: {string.Join(", ", currentBeams)}");
-    Console.WriteLine($"       -> {string.Join(", ", nextBeams)}");
-    currentBeams = nextBeams;
-};
+var solutions = new HashSet<List<Point>>() { new List<Point> { new Point(2, splitters.First().Col) } };
+solve(solutions, 2);
+Console.WriteLine($"Number of solutions: {solutions.Count}");
 
-Console.WriteLine($"There were {splitHappened} splits.");
-
-HashSet<int> moveLine(HashSet<int> currentBeams, int row)
+void solve(HashSet<List<Point>> solutions, int row)
 {
-    var nextBeams = new HashSet<int>();
-    foreach(var beamCol in currentBeams)
+    if(row >= lines.Length)
     {
-        if(splitters.Contains(new Point(row, beamCol)))
-        {
-            // Splitter found, create two beams
-            nextBeams.Add(beamCol - 1); // Left beam
-            nextBeams.Add(beamCol + 1); // Right beam
+        return;
+    }
 
-            splitHappened++;
-        }
-        else
+    var thisRowSplitters = splitters.Where(s => s.Row == row).ToList();
+    foreach(var splitter in thisRowSplitters)
+    {
+        var pathsEnding = solutions.Where(path => path.Last().Row == row).ToList();
+        foreach(var path in pathsEnding)
         {
-            // No splitter, beam continues straight down
-            nextBeams.Add(beamCol);
+            var copy = path.ToList();
+            copy.Add(new Point(row+2, splitter.Col-1));
+            solutions.Add(copy);
+            path.Add(new Point(row+2, splitter.Col+1));
         }
     }
-    return nextBeams;   
+
+    solve(solutions, row + 2);
 }
 
-record Point(int Row, int Col);
+
+
+
+public record Point(int Row, int Col);
 
 public class Splitter
 {
-    public Splitter(int row, int col)
+    public Splitter(Point point)
     {
-        Row = row;
-        Col = col;
+        Row = point.Row;
+        Col = point.Col;
     }
 
     public int Row { get; }
     public int Col { get; }
-    public int PathsForward() => 2 + Children.Sum(c => c.PathsForward());
     public IEnumerable<Splitter> Children => Enumerable.Empty<Splitter>();
-    public override string ToString() => $"Splitter at ({Row}, {Col})";
     public override bool Equals(object? obj) => obj is Splitter other && Row == other.Row && Col == other.Col && Children == other.Children;
     public override int GetHashCode() => HashCode.Combine(Row, Col, Children);
 }
