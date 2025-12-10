@@ -36,10 +36,15 @@ void solve(HashSet<List<Point>> solutions, int row)
     var thisRowSplitters = splitters.Where(s => s.Row == row).ToList();
     foreach(var splitter in thisRowSplitters)
     {
-        var pathsEnding = solutions.Where(path => path.Last().Row == row).ToList();
+        var pathsEnding = solutions.Where(path => path.Last().Row == row && path.Last().Col == splitter.Col).ToList();
         foreach(var path in pathsEnding)
         {
             var copy = path.ToList();
+            if(path.Last().Col != splitter.Col)
+            {
+                Console.WriteLine("Error: Path does not end at splitter column.");
+                continue;
+            }
             copy.Add(new Point(row+2, splitter.Col-1));
             solutions.Add(copy);
             path.Add(new Point(row+2, splitter.Col+1));
