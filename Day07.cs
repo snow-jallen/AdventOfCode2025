@@ -22,38 +22,52 @@ if(startCol != splitters.First().Col)
     return;
 }
 
-var solutions = new HashSet<List<Point>>() { new List<Point> { new Point(2, splitters.First().Col) } };
+var solutions = new HashSet<string>() { splitters.First().Col.ToString() };
 solve(solutions, 2);
 Console.WriteLine($"Number of solutions: {solutions.Count}");
+// Console.WriteLine("Solutions:");
+// foreach(var solution in solutions)
+// {
+//     Console.WriteLine(string.Join(" -> ", solution.Select(p => $"({p.Row},{p.Col})")));
+// }
 
-void solve(HashSet<List<Point>> solutions, int row)
+void solve(HashSet<string> solutions, int row)
 {
+    Console.WriteLine($"Solving row {row}, current number of solutions: {solutions.Count}");
     if(row >= lines.Length)
     {
         return;
     }
 
-    var thisRowSplitters = splitters.Where(s => s.Row == row).ToList();
-    foreach(var splitter in thisRowSplitters)
+    var thisRowSplitters = splitters.Where(s => s.Row == row).ToHashSet();
+    
+    foreach(var path in solutions.ToList())
     {
-        var pathsEnding = solutions.Where(path => path.Last().Row == row && path.Last().Col == splitter.Col).ToList();
-        foreach(var path in pathsEnding)
+        var currentCol = int.Parse(path.Split(',').Last());
+        
+        solutions.Remove(path);
+
+        if(thisRowSplitters.Any(s => s.Col == currentCol))
         {
-            var copy = path.ToList();
-            if(path.Last().Col != splitter.Col)
-            {
-                Console.WriteLine("Error: Path does not end at splitter column.");
-                continue;
-            }
-            copy.Add(new Point(row+2, splitter.Col-1));
-            solutions.Add(copy);
-            path.Add(new Point(row+2, splitter.Col+1));
+
+            // Split into two paths
+            var leftPath = path+ $", {currentCol - 1}";
+            solutions.Add(leftPath);
+            
+            var rightPath = path+ $", {currentCol + 1}";
+            solutions.Add(rightPath);
+        }
+        else
+        {
+            // Continue straight down
+            var continuedPath = path + $", {currentCol}";
+            solutions.Add(continuedPath);
         }
     }
-
-    solve(solutions, row + 2);
+    
+    
+    solve(solutions, row + 1);  // Go to NEXT row, not row + 2
 }
-
 
 
 
